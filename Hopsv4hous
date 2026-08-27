@@ -1,70 +1,72 @@
-import time
-import sys
+-- Giả lập một phần diện mạo Menu kiểu Banana Hub cho Lua Executor
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local ToggleButton = Instance.new("TextButton")
+local UICornerBtn = Instance.new("UICorner")
+local StatusLabel = Instance.new("TextLabel")
 
-def blox_typing(text, delay=0.015):
-    for char in text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(delay)
-    print()
+-- Cấu hình ScreenGui
+ScreenGui.Name = "BananaCustomMenu"
+ScreenGui.Parent = game.CoreGui
 
-def clear_screen():
-    print("\n" * 2)
+-- Khung chính của Menu
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+MainFrame.Size = UDim2.new(0, 300, 0, 180)
 
-class BloxFruitLuckHack:
-    def __init__(self):
-        self.beli = 999999999
-        self.fragments = 500000
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
 
-    def show_menu_banner(self):
-        print("=" * 65)
-        print(" 🏴‍☠️  BLOX FRUIT: QUANTUM LUCK SYSTEM (ADMIN BYPASS)  🏴‍☠️ ")
-        print(f" 💰 Beli: {self.beli:,} | 💎 Fragments: {self.fragments:,}")
-        print("=" * 65)
+-- Tiêu đề Menu
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(255, 200, 0) -- Màu vàng đặc trưng phong cách Banana
+Title.Size = UDim2.new(0, 300, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🍌 Banana Hub - Rate Customizer"
+Title.TextColor3 = Color3.fromRGB(20, 20, 20)
+Title.TextSize = 14
 
-    def trigger_action(self, action_name, reward):
-        clear_screen()
-        print(f"[*] Đang thực hiện kết nối tới Server Blox Fruit...")
-        blox_typing(f"[+] Đang bypass hệ thống Anti-Cheat cho: [{action_name}]...")
-        time.sleep(0.5)
-        blox_typing("[+] Ép xung RNG của Cousin (Gacha) và Blacksmith lên 100%...")
-        time.sleep(0.5)
-        
-        print("\n" + "⚡" * 28)
-        print(f" 🌟 ROLL THÀNH CÔNG: {reward.upper()} (TỈ LỆ: 100%) 🌟 ")
-        print("⚡" * 28)
-        blox_typing(f"-> Quá uy tín! Kho đồ của bạn vừa nhận được: [{reward}] vĩnh viễn!\n")
+-- Nút bấm kích hoạt tính năng buff tỉ lệ 67% giả lập
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = MainFrame
+ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.35, 0)
+ToggleButton.Size = UDim2.new(0, 240, 0, 40)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "Buff Rate: 67% (Off)"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 14
 
-    def run(self):
-        while True:
-            self.show_menu_banner()
-            print(" [1] 🍎 Roll Trái Ác Quỷ (Cousin) -> Chắc chắn ra Mythical (Kitsune/Leopard)")
-            print(" [2] ⚔️ Cường hóa vũ khí / Thợ rèn (Cursed Dual Katana / Shark Anchor +Max)")
-            print(" [3] 👑 Roll Tộc V4 / Thức tỉnh chủng tộc (Awakening Race Full Gear)")
-            print(" [4] 🎯 Săn Sea Beast / Leviathan (100% rớt tim và nguyên liệu xịn)")
-            print(" [0] 🚪 Thoát game (Đứng đảo giữa khoe item)")
-            print("-" * 65)
-            
-            choice = input("👉 Click chọn tính năng buff [0-4]: ").strip()
-            
-            if choice == '1':
-                self.trigger_action("Roll Trái Ác Quỷ", "Fruit: Kitsune-Kitsune (Permanent)")
-            elif choice == '2':
-                self.trigger_action("Nâng cấp Cursed Dual Katana", "CDK + Max Damage (Real Buff)")
-            elif choice == '3':
-                self.trigger_action("Quest Thức Tỉnh Tộc V4", "Full Gears & Ultimate Ability")
-            elif choice == '4':
-                self.trigger_action("Săn Leviathan", "Leviathan Heart & Scales x99")
-            elif choice == '0':
-                blox_typing("[-] Đang thoát game an toàn... Chúc bạn cày cuốc vui vẻ!")
-                break
-            else:
-                print("⚠️ Phím bấm không hợp lệ, nhưng vì bạn là admin nên hệ thống vẫn châm chước!")
-            
-            input("Nhấn Enter để quay lại Menu chính...")
-            clear_screen()
+UICornerBtn.CornerRadius = UDim.new(0, 6)
+UICornerBtn.Parent = ToggleButton
 
-# --- KHỞI CHẠY ---
-if __name__ == "__main__":
-    game_hack = BloxFruitLuckHack()
-    game_hack.run()
+-- Nhãn trạng thái hiển thị
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Parent = MainFrame
+StatusLabel.Position = UDim2.new(0.1, 0, 0.7, 0)
+StatusLabel.Size = UDim2.new(0, 240, 0, 30)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Text = "Trạng thái: Chưa bật"
+StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+StatusLabel.TextSize = 12
+
+-- Logic khi bấm nút (UI tương tác cục bộ)
+local isActive = false
+ToggleButton.MouseButton1Click:Connect(function()
+    isActive = not isActive
+    if isActive then
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        ToggleButton.Text = "Buff Rate: 67% (Active)"
+        StatusLabel.Text = "Đã khóa tỉ lệ Client ở mức: 67%"
+        -- Lưu ý: Đoạn này chỉ thay đổi hiển thị trên màn hình của bạn (Visual Client-side)
+    else
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+        ToggleButton.Text = "Buff Rate: 67% (Off)"
+        StatusLabel.Text = "Trạng thái: Đã tắt"
+    end
+end)
