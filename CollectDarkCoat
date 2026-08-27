@@ -1,11 +1,6 @@
 -- ==========================================================
--- SCRIPT AUTO FIST OF DARKNESS & BLACKBEARD CAPE + TWEEN
+-- SCRIPT BLOX FRUIT: TWEEN NHẶT 36 RƯƠNG -> SĂN FIST OF DARKNESS / DARK COAT
 -- ==========================================================
-
-if getgenv().AutoFarmDarkCoatRunning then
-    return
-end
-getgenv().AutoFarmDarkCoatRunning = true
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -13,10 +8,10 @@ local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
--- Tốc độ bay/tween (điều chỉnh tăng giảm tùy ý, mặc định 300 là khá an toàn)
+-- Tốc độ bay/tween (có thể chỉnh số lớn hơn để bay nhanh hơn, ví dụ: 300 hoặc 350)
 local TWEEN_SPEED = 300 
 
--- Hàm kiểm tra vật phẩm
+-- Hàm kiểm tra vật phẩm trong người
 local function checkItem(itemName)
     if LocalPlayer.Backpack:FindFirstChild(itemName) then
         return true
@@ -27,7 +22,7 @@ local function checkItem(itemName)
     return false
 end
 
--- Hàm Tween (di chuyển mượt đến vị trí chỉ định)
+-- Hàm thực hiện Tween di chuyển mượt đến tọa độ
 local function tweenTo(targetCFrame)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -39,7 +34,6 @@ local function tweenTo(targetCFrame)
     local tweenInfo = TweenInfo.new(timeToTravel, Enum.EasingStyle.Linear)
     local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
     
-    getgenv().CurrentTween = tween
     tween:Play()
     
     local completed = false
@@ -49,7 +43,7 @@ local function tweenTo(targetCFrame)
         if connection then connection:Disconnect() end
     end)
     
-    -- Đợi cho đến khi tween chạy xong hoặc bị ngắt
+    -- Chờ đến khi bay tới nơi hoặc có vật phẩm đổi trạng thái
     while not completed and character and character.Parent do
         if checkItem("Dark Coat") or checkItem("Fist of Darkness") then
             tween:Cancel()
@@ -60,9 +54,9 @@ local function tweenTo(targetCFrame)
     end
 end
 
--- Hàm Hop Server
+-- Hàm Hop Server (Chuyển server)
 local function hopServer()
-    local success, err = pcall(function()
+    pcall(function()
         local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
         for _, server in ipairs(servers.data) do
             if server.playing < server.maxPlayers and server.id ~= game.JobId then
@@ -71,37 +65,41 @@ local function hopServer()
             end
         end
     end)
-    if not success then
-        warn("Lỗi khi hop server, đang thử lại...")
-        task.wait(2)
-        hopServer()
-    end
 end
 
 -- Vòng lặp chính
 task.spawn(function()
     while true do
-        -- Kiểm tra nếu đã có Áo choàng râu đen
+        -- Nếu đã có Áo choàng râu đen thì dừng
         if checkItem("Dark Coat") then
-            print(">>> ĐÃ SỞ HỮU ÁO CHOÀNG RÂU ĐEN! Dừng script.")
-            getgenv().AutoFarmDarkCoatRunning = false
+            print("Đã có Áo choàng râu đen! Dừng script.")
             break
         end
 
-        print(">>> Bắt đầu chu kỳ tween nhặt rương...")
+        print("Bắt đầu chu kỳ tween nhặt 36 rương...")
         local chestCount = 0
-        
-        -- Quét và tween đến từng rương
+        local startTime = tick()
+        local fourHours = 4 * 60 * 60 -- 4 tiếng tính bằng giây
+
+        -- Vòng lặp quét và tween đến từng rương
         for _, v in pairs(workspace:GetDescendants()) do
             if checkItem("Dark Coat") or checkItem("Fist of Darkness") then break end
             
+            -- Kiểm tra thời gian nếu chạy quá 4 tiếng mà chưa xong thì hop server
+            if (tick() - startTime) >= fourHours then
+                print("Đã chạy đủ 4 tiếng, tiến hành hop server...")
+                hopServer()
+                task.wait(10)
+                break
+            end
+
             if v.Name:lower():find("chest") and v:IsA("BasePart") then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    -- Thực hiện bay mượt tới rương
+                    -- Bay mượt đến vị trí rương
                     tweenTo(v.CFrame)
-                    task.wait(0.3) -- Chờ thời gian ngắn để game nhận rương
+                    task.wait(0.3) -- Chờ thời gian ngắn để nhận diện nhặt rương
                     chestCount = chestCount + 1
-                    print("Đã nhặt rương thứ: " .. chestCount)
+                    print("Đã tween nhặt rương thứ: " .. chestCount)
                     
                     if chestCount >= 36 then
                         break
@@ -110,24 +108,24 @@ task.spawn(function()
             end
         end
 
-        -- Kiểm tra Fist of Darkness sau khi nhặt rương
+        -- Kiểm tra xem có Fist of Darkness không
         if checkItem("Fist of Darkness") then
-            print(">>> ĐÃ TÌM THẤY FIST OF DARKNESS! Tween đến bệ thờ Râu Đen...")
+            print("Đã có Fist of Darkness! Tween đến bệ thờ triệu hồi Râu Đen...")
             
-            -- Tọa độ bệ thờ Dark Arena tại Sea 2
-            local darkArenaPos = CFrame.new(3775, 20, -3499)
-            tweenTo(darkArenaPos)
-            task.wait(1)
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                -- Tween đến bệ thờ Râu Đen ở Sea 2
+                tweenTo(CFrame.new(3775, 20, -3499))
+                task.wait(2)
+            end
             
-            -- Chờ tiêu diệt Râu Đen
+            -- Đợi đánh Râu Đen cho đến khi chết hoặc nhặt được áo choàng
             repeat
                 task.wait(2)
-                print("Đang chờ hoặc tiêu diệt Boss Râu Đen (Darkbeard)...")
+                print("Đang đánh Râu Đen săn Áo choàng...")
             until not workspace.Enemies:FindFirstChild("Darkbeard") or checkItem("Dark Coat")
             
         else
-            print(">>> Đã nhặt xong rương nhưng không có Fist of Darkness. Đang chuyển Server...")
-            task.wait(1)
+            print("Không ra Fist of Darkness, tiến hành hop server...")
             hopServer()
             task.wait(10)
         end
