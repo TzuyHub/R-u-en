@@ -1,17 +1,17 @@
 -- ==========================================================
--- SCRIPT BLOX FRUIT: TWEEN NHẶT 36 RƯƠNG -> SĂN FIST OF DARKNESS / DARK COAT
+-- SCRIPT BLOX FRUIT: TWEEN MƯỢT (KHÔNG GIẬT) NHẶT 36 RƯƠNG
 -- ==========================================================
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
 
--- Tốc độ bay/tween (có thể chỉnh số lớn hơn để bay nhanh hơn, ví dụ: 300 hoặc 350)
-local TWEEN_SPEED = 300 
+-- Tốc độ bay (có thể điều chỉnh lớn/nhỏ tùy ý)
+local FLY_SPEED = 250 
 
--- Hàm kiểm tra vật phẩm trong người
+-- Hàm kiểm tra vật phẩm
 local function checkItem(itemName)
     if LocalPlayer.Backpack:FindFirstChild(itemName) then
         return true
@@ -22,39 +22,49 @@ local function checkItem(itemName)
     return false
 end
 
--- Hàm thực hiện Tween di chuyển mượt đến tọa độ
-local function tweenTo(targetCFrame)
+-- Hàm bay mượt bằng Lerp (Không bị giật khung hình)
+local function smoothFlyTo(targetCFrame)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     
     local rootPart = character.HumanoidRootPart
-    local distance = (rootPart.Position - targetCFrame.Position).Magnitude
-    local timeToTravel = distance / TWEEN_SPEED
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
     
-    local tweenInfo = TweenInfo.new(timeToTravel, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
-    
-    tween:Play()
-    
-    local completed = false
-    local connection
-    connection = tween.Completed:Connect(function()
-        completed = true
-        if connection then connection:Disconnect() end
-    end)
-    
-    -- Chờ đến khi bay tới nơi hoặc có vật phẩm đổi trạng thái
-    while not completed and character and character.Parent do
-        if checkItem("Dark Coat") or checkItem("Fist of Darkness") then
-            tween:Cancel()
-            if connection then connection:Disconnect() end
-            break
-        end
-        task.wait(0.1)
+    -- Tắt trọng lực tạm thời bằng cách đưa nhân vật về trạng thái PlatformStand hoặc vô hiệu hóa điều khiển hướng
+    if humanoid then
+        humanoid.PlatformStand = true
     end
+
+    local startPos = rootPart.Position
+    local endPos = targetCFrame.Position
+    local distance = (startPos - endPos).Magnitude
+    local totalTime = distance / FLY_SPEED
+    local elapsed = 0
+
+    while elapsed < totalTime do
+        if checkItem("Dark Coat") or checkItem("Fist of Darkness") then break end
+        if not character or not character.Parent or not rootPart.Parent then break end
+
+        local dt = RunService.RenderStepped:Wait()
+        elapsed = elapsed + dt
+        local alpha = math.clamp(elapsed / totalTime, 0, 1)
+        
+        -- Tính toán vị trí mượt mà bằng Lerp
+        rootPart.CFrame = CFrame.new(startPos:Lerp(endPos, alpha)) * (targetCFrame - targetCFrame.Position)
+        
+        -- Khóa vận tốc để không bị rơi rớt hay khựng physics
+        rootPart.Velocity = Vector3.new(0, 0, 0)
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    end
+
+    -- Bật lại trạng thái bình thường cho nhân vật
+    if humanoid then
+        humanoid.PlatformStand = false
+    end
+    rootPart.CFrame = targetCFrame
 end
 
--- Hàm Hop Server (Chuyển server)
+-- Hàm Hop Server
 local function hopServer()
     pcall(function()
         local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
@@ -70,22 +80,19 @@ end
 -- Vòng lặp chính
 task.spawn(function()
     while true do
-        -- Nếu đã có Áo choàng râu đen thì dừng
         if checkItem("Dark Coat") then
             print("Đã có Áo choàng râu đen! Dừng script.")
             break
         end
 
-        print("Bắt đầu chu kỳ tween nhặt 36 rương...")
+        print("Bắt đầu chu kỳ bay mượt nhặt 36 rương...")
         local chestCount = 0
         local startTime = tick()
-        local fourHours = 4 * 60 * 60 -- 4 tiếng tính bằng giây
+        local fourHours = 4 * 60 * 60
 
-        -- Vòng lặp quét và tween đến từng rương
         for _, v in pairs(workspace:GetDescendants()) do
             if checkItem("Dark Coat") or checkItem("Fist of Darkness") then break end
             
-            -- Kiểm tra thời gian nếu chạy quá 4 tiếng mà chưa xong thì hop server
             if (tick() - startTime) >= fourHours then
                 print("Đã chạy đủ 4 tiếng, tiến hành hop server...")
                 hopServer()
@@ -95,11 +102,11 @@ task.spawn(function()
 
             if v.Name:lower():find("chest") and v:IsA("BasePart") then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    -- Bay mượt đến vị trí rương
-                    tweenTo(v.CFrame)
-                    task.wait(0.3) -- Chờ thời gian ngắn để nhận diện nhặt rương
+                    -- Bay mượt đến rương không giật
+                    smoothFlyTo(v.CFrame)
+                    task.wait(0.2)
                     chestCount = chestCount + 1
-                    print("Đã tween nhặt rương thứ: " .. chestCount)
+                    print("Đã nhặt rương thứ: " .. chestCount)
                     
                     if chestCount >= 36 then
                         break
@@ -108,17 +115,14 @@ task.spawn(function()
             end
         end
 
-        -- Kiểm tra xem có Fist of Darkness không
         if checkItem("Fist of Darkness") then
-            print("Đã có Fist of Darkness! Tween đến bệ thờ triệu hồi Râu Đen...")
+            print("Đã có Fist of Darkness! Bay đến bệ thờ triệu hồi Râu Đen...")
             
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                -- Tween đến bệ thờ Râu Đen ở Sea 2
-                tweenTo(CFrame.new(3775, 20, -3499))
+                smoothFlyTo(CFrame.new(3775, 20, -3499))
                 task.wait(2)
             end
             
-            -- Đợi đánh Râu Đen cho đến khi chết hoặc nhặt được áo choàng
             repeat
                 task.wait(2)
                 print("Đang đánh Râu Đen săn Áo choàng...")
