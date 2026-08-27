@@ -1,101 +1,45 @@
--- Kiểm tra xem đang ở Blox Fruit không
-if game.PlaceId == 2753915549 or game.PlaceId == 4442272183 or game.PlaceId == 7449423635 then
+import time
+import sys
 
-    -- Sử dụng Fluent UI Library (hoặc bạn có thể thay bằng lib khác nếu muốn)
-    local repo = 'https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Main.lua'
-    local Library = loadstring(game:HttpGet(repo))()
-    local Window = Library:CreateWindow({
-        Title = "Blox Fruit - Hop Server 4H+",
-        SubTitle = "By AI Assistant",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(580, 460),
-        Acrylic = false,
-        Theme = "Dark",
-        MinimizeKey = Enum.KeyCode.LeftControl
-    })
+def real_flex_loading(text):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(0.02)
+    print()
 
-    local Tabs = {
-        Main = Window:AddTab({ Title = "Server 4 Tiếng", Icon = "server" })
-    }
+class UltimateLuckBuffer:
+    def __init__(self, username):
+        self.username = username
+        self.luck_rate = 100.0  # Mặc định 100% không bàn cãi
 
-    local Options = Library.Options
+    def initialize_system(self):
+        print("=" * 50)
+        real_flex_loading(f"[SYSTEM]: Đang khởi tạo Quantum Engine cho user: {self.username}...")
+        real_flex_loading("[SECURITY]: Bypass tường lửa thành công. Không có chỗ choa sự xui xẻo!")
+        print("=" * 50)
 
-    -- Biến lưu trạng thái
-    local isHopping = false
-    local targetServerTime = 4 * 3600 -- 4 tiếng tính bằng giây (14400 giây)
-    -- Giới hạn dưới 4 tiếng rưỡi (4.5 * 3600 = 16200 giây) nếu cần, hoặc cứ > 4 tiếng là được.
+    def roll_gacha_or_action(self, action_name):
+        self.initialize_system()
+        
+        print(f"\n[*] Đang tiến hành thực hiện: [{action_name}]")
+        for i in range(1, 4):
+            print(f"[{i}/3] Đang nạp năng lượng nhân phẩm...")
+            time.sleep(0.5)
 
-    -- Hàm check thời gian server và hop
-    local HttpService = game:GetService("HttpService")
-    local TeleportService = game:GetService("TeleportService")
-    local Players = game:GetService("Players")
+        # Ép xung tỉ lệ tuyệt đối
+        success = True  # Hardcode 100% win vì code này quá xịn
+        
+        if success:
+            print("\n" + "✨" * 20)
+            print(f" THÀNH CÔNG MỸ MÃN! TỈ LỆ: {self.luck_rate}% ")
+            print("✨" * 20)
+            print(f"-> Chúc mừng {self.username}, bạn vừa hack thành công vận mệnh!")
+        else:
+            # Dòng code này chỉ để cho có, thực tế không bao giờ chạy tới đây được 😎
+            print("[-] Lỗi: Vận may quá lớn làm sập hệ thống.")
 
-    local function HopServer4Hours()
-        isHopping = true
-        Tabs.Main:AddParagraph({
-            Title = "Trạng thái",
-            Content = "Đang quét danh sách server tìm server chạy từ 4 đến 4.5 tiếng..."
-        })
-
-        while isHopping do
-            local success, servers = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-            end)
-
-            if success and servers and servers.data then
-                for _, server in pairs(servers.data) do
-                    -- Roblox API trả về thông tin cơ bản, đôi khi không có trực tiếp uptime server. 
-                    -- Ta thường dùng DistributedGameTime của server hiện tại hoặc check qua ping/thời gian tạo nếu API hỗ trợ.
-                    -- Vì Roblox API công khai hạn chế thông tin tuổi server chính xác từng phút trừ khi dùng qua các bên thứ 3 (như Rolimons/Roscanner),
-                    -- cách tối ưu trong game là check DistributedGameTime của server hiện tại hoặc lặp tìm server có lượng player thấp/thời gian sống lâu.
-                    
-                    if server.playing and server.playing < (server.maxPlayers - 1) then
-                        -- Kiểm tra nếu server thỏa mãn điều kiện thời gian (thường các scripter dùng trick check thời gian thông qua api phụ hoặc lặp liên tục)
-                        -- Dưới đây là logic chuyển server mẫu:
-                        if server.id ~= game.JobId then
-                            print("Đang chuyển đến server có ID: " .. server.id)
-                            TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Players.LocalPlayer)
-                            task.wait(5)
-                        end
-                    end
-                end
-            end
-            task.wait(2)
-        end
-    end
-
-    -- Tạo Toggle trong Menu
-    Tabs.Main:AddToggle("AutoHop4H", {
-        Title = "Bật Auto Hop Server (4h - 4h30)",
-        Default = false,
-        Callback = function(Value)
-            isHopping = Value
-            if Value then
-                task.spawn(HopServer4Hours)
-            else
-                print("Đã tắt Auto Hop!")
-            end
-        end
-    })
-
-    -- Nút bấm thủ công giống ảnh (Làm mới danh sách / Hop ngay)
-    Tabs.Main:AddButton({
-        Title = "Làm mới danh sách & Hop ngay",
-        Description = "Tìm và đổi sang server ngẫu nhiên khác",
-        Callback = function()
-            local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-            local randomServer = servers.data[math.random(1, #servers.data)]
-            if randomServer and randomServer.id ~= game.JobId then
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, randomServer.id, Players.LocalPlayer)
-            end
-        end
-    })
-
-    Library:Notify({
-        Title = "Load Script Thành Công!",
-        Content = "Hãy chọn tính năng trong menu.",
-        Duration = 5
-    })
-else
-    warn("Vui lòng vào game Blox Fruit trước khi chạy script này!")
-end
+# --- KHỞI CHẠY ---
+if __name__ == "__main__":
+    my_flex = UltimateLuckBuffer("RealKid_Master")
+    my_flex.roll_gacha_or_action("Buff tỉ lệ quay hũ / Đập đồ 100%")
