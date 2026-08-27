@@ -1,7 +1,7 @@
 import time
 import sys
 
-def typing_effect(text, delay=0.015):
+def blox_typing(text, delay=0.015):
     for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()
@@ -11,58 +11,60 @@ def typing_effect(text, delay=0.015):
 def clear_screen():
     print("\n" * 2)
 
-class LuckControlPanel:
+class BloxFruitLuckHack:
     def __init__(self):
-        self.luck_rate = 100.0
+        self.beli = 999999999
+        self.fragments = 500000
 
-    def show_banner(self):
-        print("=" * 60)
-        print(" 🔥  QUANTUM LUCK OVERRIDER - HỆ THỐNG BUFF 100% MAY MẮN  🔥 ")
-        print("=" * 60)
+    def show_menu_banner(self):
+        print("=" * 65)
+        print(" 🏴‍☠️  BLOX FRUIT: QUANTUM LUCK SYSTEM (ADMIN BYPASS)  🏴‍☠️ ")
+        print(f" 💰 Beli: {self.beli:,} | 💎 Fragments: {self.fragments:,}")
+        print("=" * 65)
 
-    def trigger_buff(self, task_name):
+    def trigger_action(self, action_name, reward):
         clear_screen()
-        print(f"[*] Đang kích hoạt giao thức cho: [{task_name}]")
-        typing_effect("[+] Đang bẻ cong thuật toán RNG của vũ trụ...")
-        time.sleep(0.4)
-        typing_effect("[+] Ép xung nhân phẩm lên ngưỡng tối đa (100.0%)...")
-        time.sleep(0.4)
+        print(f"[*] Đang thực hiện kết nối tới Server Blox Fruit...")
+        blox_typing(f"[+] Đang bypass hệ thống Anti-Cheat cho: [{action_name}]...")
+        time.sleep(0.5)
+        blox_typing("[+] Ép xung RNG của Cousin (Gacha) và Blacksmith lên 100%...")
+        time.sleep(0.5)
         
-        print("\n" + "🌟" * 25)
-        print(f" KẾT QUẢ: THÀNH CÔNG 100% TUYỆT ĐỐI! ")
-        print("🌟" * 25)
-        print(f"-> Chúc mừng! Bạn đã vượt qua mọi xác suất thống kê. Quá uy tín!\n")
+        print("\n" + "⚡" * 28)
+        print(f" 🌟 ROLL THÀNH CÔNG: {reward.upper()} (TỈ LỆ: 100%) 🌟 ")
+        print("⚡" * 28)
+        blox_typing(f"-> Quá uy tín! Kho đồ của bạn vừa nhận được: [{reward}] vĩnh viễn!\n")
 
     def run(self):
         while True:
-            self.show_banner()
-            print(" [1] 🗡️ Buff tỉ lệ đập đồ / Cường hóa (Không bao giờ xịt)")
-            print(" [2] 🎰 Buff tỉ lệ quay Gacha / Random Item (Rate-up vô cực)")
-            print(" [3] 🎲 Buff tỉ lệ xúc xắc / Thi cử / Trắc nghiệm (Đúng toàn tập)")
-            print(" [4] 🚀 Kích hoạt siêu buff toàn diện (All-in)")
-            print(" [0] ❌ Thoát (Vì vận may đã quá thừa thãi)")
-            print("-" * 60)
+            self.show_menu_banner()
+            print(" [1] 🍎 Roll Trái Ác Quỷ (Cousin) -> Chắc chắn ra Mythical (Kitsune/Leopard)")
+            print(" [2] ⚔️ Cường hóa vũ khí / Thợ rèn (Cursed Dual Katana / Shark Anchor +Max)")
+            print(" [3] 👑 Roll Tộc V4 / Thức tỉnh chủng tộc (Awakening Race Full Gear)")
+            print(" [4] 🎯 Săn Sea Beast / Leviathan (100% rớt tim và nguyên liệu xịn)")
+            print(" [0] 🚪 Thoát game (Đứng đảo giữa khoe item)")
+            print("-" * 65)
             
-            choice = input("👉 Nhấn chọn tính năng muốn buff [0-4]: ").strip()
+            choice = input("👉 Click chọn tính năng buff [0-4]: ").strip()
             
             if choice == '1':
-                self.trigger_buff("Cường hóa trang bị +15")
+                self.trigger_action("Roll Trái Ác Quỷ", "Fruit: Kitsune-Kitsune (Permanent)")
             elif choice == '2':
-                self.trigger_buff("Quay Gacha banner giới hạn")
+                self.trigger_action("Nâng cấp Cursed Dual Katana", "CDK + Max Damage (Real Buff)")
             elif choice == '3':
-                self.trigger_buff("Khoanh bừa trắc nghiệm / Quay số")
+                self.trigger_action("Quest Thức Tỉnh Tộc V4", "Full Gears & Ultimate Ability")
             elif choice == '4':
-                self.trigger_buff("Hệ thống tối thượng - Chấp mọi thể loại xác suất")
+                self.trigger_action("Săn Leviathan", "Leviathan Heart & Scales x99")
             elif choice == '0':
-                typing_effect("[-] Đang ngắt kết nối... Chúc bạn luôn gặp may mắn trong đời thực!")
+                blox_typing("[-] Đang thoát game an toàn... Chúc bạn cày cuốc vui vẻ!")
                 break
             else:
-                print("⚠️ Lựa chọn không hợp lệ, nhưng vì bạn là real kid nên vẫn được tính là may mắn!")
+                print("⚠️ Phím bấm không hợp lệ, nhưng vì bạn là admin nên hệ thống vẫn châm chước!")
             
             input("Nhấn Enter để quay lại Menu chính...")
             clear_screen()
 
-# --- KHỞI CHẠY CHƯƠNG TRÌNH ---
+# --- KHỞI CHẠY ---
 if __name__ == "__main__":
-    panel = LuckControlPanel()
-    panel.run()
+    game_hack = BloxFruitLuckHack()
+    game_hack.run()
