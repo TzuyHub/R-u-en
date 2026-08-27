@@ -1,5 +1,5 @@
 -- ==========================================================
--- SCRIPT BLOX FRUIT: TWEEN MƯỢT (KHÔNG GIẬT) NHẶT 36 RƯƠNG
+-- SCRIPT BLOX FRUIT: NHẶT 36 RƯƠNG (TỐC ĐỘ 236) + SĂN RÂU ĐEN
 -- ==========================================================
 
 local Players = game:GetService("Players")
@@ -8,8 +8,8 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
--- Tốc độ bay (có thể điều chỉnh lớn/nhỏ tùy ý)
-local FLY_SPEED = 250 
+-- Tốc độ bay được đặt chính xác là 236
+local FLY_SPEED = 236 
 
 -- Hàm kiểm tra vật phẩm
 local function checkItem(itemName)
@@ -22,7 +22,7 @@ local function checkItem(itemName)
     return false
 end
 
--- Hàm bay mượt bằng Lerp (Không bị giật khung hình)
+-- Hàm bay mượt bằng Lerp với tốc độ 236
 local function smoothFlyTo(targetCFrame)
     local character = LocalPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -30,7 +30,6 @@ local function smoothFlyTo(targetCFrame)
     local rootPart = character.HumanoidRootPart
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     
-    -- Tắt trọng lực tạm thời bằng cách đưa nhân vật về trạng thái PlatformStand hoặc vô hiệu hóa điều khiển hướng
     if humanoid then
         humanoid.PlatformStand = true
     end
@@ -49,19 +48,37 @@ local function smoothFlyTo(targetCFrame)
         elapsed = elapsed + dt
         local alpha = math.clamp(elapsed / totalTime, 0, 1)
         
-        -- Tính toán vị trí mượt mà bằng Lerp
         rootPart.CFrame = CFrame.new(startPos:Lerp(endPos, alpha)) * (targetCFrame - targetCFrame.Position)
-        
-        -- Khóa vận tốc để không bị rơi rớt hay khựng physics
         rootPart.Velocity = Vector3.new(0, 0, 0)
         rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
     end
 
-    -- Bật lại trạng thái bình thường cho nhân vật
     if humanoid then
         humanoid.PlatformStand = false
     end
     rootPart.CFrame = targetCFrame
+end
+
+-- Hàm quét và sắp xếp rương từ gần đến xa
+local function getSortedChests()
+    local chests = {}
+    local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return chests end
+
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name:lower():find("chest") and v:IsA("BasePart") then
+            table.insert(chests, v)
+        end
+    end
+
+    -- Sắp xếp rương: Rương gần nhất đứng đầu danh sách
+    table.sort(chests, function(a, b)
+        local distA = (a.Position - rootPart.Position).Magnitude
+        local distB = (b.Position - rootPart.Position).Magnitude
+        return distA < distB
+    end)
+
+    return chests
 end
 
 -- Hàm Hop Server
@@ -85,12 +102,14 @@ task.spawn(function()
             break
         end
 
-        print("Bắt đầu chu kỳ bay mượt nhặt 36 rương...")
+        print("Bắt đầu quét và nhặt rương từ gần đến xa với tốc độ 236...")
         local chestCount = 0
         local startTime = tick()
         local fourHours = 4 * 60 * 60
 
-        for _, v in pairs(workspace:GetDescendants()) do
+        local chestsList = getSortedChests()
+        
+        for _, v in ipairs(chestsList) do
             if checkItem("Dark Coat") or checkItem("Fist of Darkness") then break end
             
             if (tick() - startTime) >= fourHours then
@@ -100,11 +119,10 @@ task.spawn(function()
                 break
             end
 
-            if v.Name:lower():find("chest") and v:IsA("BasePart") then
+            if v and v.Parent and v:IsA("BasePart") then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    -- Bay mượt đến rương không giật
                     smoothFlyTo(v.CFrame)
-                    task.wait(0.2)
+                    task.wait(0.25)
                     chestCount = chestCount + 1
                     print("Đã nhặt rương thứ: " .. chestCount)
                     
