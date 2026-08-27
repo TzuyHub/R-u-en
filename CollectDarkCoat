@@ -1,0 +1,107 @@
+-- ==========================================================
+-- SCRIPT AUTO FIST OF DARKNESS & BLACKBEARD CAPE + AUTO EXECUTE
+-- ==========================================================
+
+-- Đảm bảo script tự động chạy lại khi load xong game hoặc hop server
+if getgenv().AutoFarmDarkCoatRunning then
+    return
+end
+getgenv().AutoFarmDarkCoatRunning = true
+
+-- Bật tính năng chống treo/crash (nếu Executor hỗ trợ)
+if syn and syn.toast_notification then
+    syn.toast_notification("Script Auto Dark Coat đã được kích hoạt!")
+end
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
+-- Hàm kiểm tra vật phẩm
+local function checkItem(itemName)
+    if LocalPlayer.Backpack:FindFirstChild(itemName) then
+        return true
+    end
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(itemName) then
+        return true
+    end
+    return false
+end
+
+-- Hàm Hop Server
+local function hopServer()
+    local success, err = pcall(function()
+        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        for _, server in ipairs(servers.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                break
+            end
+        end
+    end)
+    if not success then
+        warn("Lỗi khi hop server, đang thử lại...")
+        task.wait(2)
+        hopServer()
+    end
+end
+
+-- Vòng lặp chính
+task.spawn(function()
+    while true do
+        -- Kiểm tra nếu đã có Áo choàng râu đen (Dark Coat)
+        if checkItem("Dark Coat") then
+            print(">>> ĐÃ SỞ HỮU ÁO CHOÀNG RÂU ĐEN! Dừng script.")
+            getgenv().AutoFarmDarkCoatRunning = false
+            break
+        end
+
+        print(">>> Bắt đầu chu kỳ nhặt rương...")
+        local chestCount = 0
+        
+        -- Quét và nhặt tối đa 36 rương
+        for _, v in pairs(workspace:GetDescendants()) do
+            if checkItem("Dark Coat") then break end
+            
+            if v.Name:lower():find("chest") and v:IsA("BasePart") then
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                    task.wait(0.5)
+                    chestCount = chestCount + 1
+                    print("Đã nhặt rương thứ: " .. chestCount)
+                    
+                    if chestCount >= 36 then
+                        break
+                    end
+                end
+            end
+        end
+
+        -- Kiểm tra Fist of Darkness
+        if checkItem("Fist of Darkness") then
+            print(">>> ĐÃ TÌM THẤY FIST OF DARKNESS! Triệu hồi Râu Đen...")
+            
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                -- Tọa độ bệ thờ Dark Arena tại Sea 2
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(3775, 20, -3499)
+                task.wait(2)
+            end
+            
+            -- Chờ tiêu diệt Râu Đen
+            repeat
+                task.wait(2)
+                print("Đang chờ hoặc tiêu diệt Boss Râu Đen (Darkbeard)...")
+            until not workspace.Enemies:FindFirstChild("Darkbeard") or checkItem("Dark Coat")
+            
+        else
+            print(">>> Không thấy Fist of Darkness. Đang tiến hành Hop Server...")
+            task.wait(1)
+            hopServer()
+            -- Chờ server mới load (nếu chưa kịp teleport thì script sẽ tự loop chờ)
+            task.wait(10)
+        end
+        
+        task.wait(1)
+    end
+end)
