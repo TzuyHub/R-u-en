@@ -1,45 +1,68 @@
 import time
 import sys
 
-def real_flex_loading(text):
+def typing_effect(text, delay=0.015):
     for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()
-        time.sleep(0.02)
+        time.sleep(delay)
     print()
 
-class UltimateLuckBuffer:
-    def __init__(self, username):
-        self.username = username
-        self.luck_rate = 100.0  # Mặc định 100% không bàn cãi
+def clear_screen():
+    print("\n" * 2)
 
-    def initialize_system(self):
-        print("=" * 50)
-        real_flex_loading(f"[SYSTEM]: Đang khởi tạo Quantum Engine cho user: {self.username}...")
-        real_flex_loading("[SECURITY]: Bypass tường lửa thành công. Không có chỗ choa sự xui xẻo!")
-        print("=" * 50)
+class LuckControlPanel:
+    def __init__(self):
+        self.luck_rate = 100.0
 
-    def roll_gacha_or_action(self, action_name):
-        self.initialize_system()
+    def show_banner(self):
+        print("=" * 60)
+        print(" 🔥  QUANTUM LUCK OVERRIDER - HỆ THỐNG BUFF 100% MAY MẮN  🔥 ")
+        print("=" * 60)
+
+    def trigger_buff(self, task_name):
+        clear_screen()
+        print(f"[*] Đang kích hoạt giao thức cho: [{task_name}]")
+        typing_effect("[+] Đang bẻ cong thuật toán RNG của vũ trụ...")
+        time.sleep(0.4)
+        typing_effect("[+] Ép xung nhân phẩm lên ngưỡng tối đa (100.0%)...")
+        time.sleep(0.4)
         
-        print(f"\n[*] Đang tiến hành thực hiện: [{action_name}]")
-        for i in range(1, 4):
-            print(f"[{i}/3] Đang nạp năng lượng nhân phẩm...")
-            time.sleep(0.5)
+        print("\n" + "🌟" * 25)
+        print(f" KẾT QUẢ: THÀNH CÔNG 100% TUYỆT ĐỐI! ")
+        print("🌟" * 25)
+        print(f"-> Chúc mừng! Bạn đã vượt qua mọi xác suất thống kê. Quá uy tín!\n")
 
-        # Ép xung tỉ lệ tuyệt đối
-        success = True  # Hardcode 100% win vì code này quá xịn
-        
-        if success:
-            print("\n" + "✨" * 20)
-            print(f" THÀNH CÔNG MỸ MÃN! TỈ LỆ: {self.luck_rate}% ")
-            print("✨" * 20)
-            print(f"-> Chúc mừng {self.username}, bạn vừa hack thành công vận mệnh!")
-        else:
-            # Dòng code này chỉ để cho có, thực tế không bao giờ chạy tới đây được 😎
-            print("[-] Lỗi: Vận may quá lớn làm sập hệ thống.")
+    def run(self):
+        while True:
+            self.show_banner()
+            print(" [1] 🗡️ Buff tỉ lệ đập đồ / Cường hóa (Không bao giờ xịt)")
+            print(" [2] 🎰 Buff tỉ lệ quay Gacha / Random Item (Rate-up vô cực)")
+            print(" [3] 🎲 Buff tỉ lệ xúc xắc / Thi cử / Trắc nghiệm (Đúng toàn tập)")
+            print(" [4] 🚀 Kích hoạt siêu buff toàn diện (All-in)")
+            print(" [0] ❌ Thoát (Vì vận may đã quá thừa thãi)")
+            print("-" * 60)
+            
+            choice = input("👉 Nhấn chọn tính năng muốn buff [0-4]: ").strip()
+            
+            if choice == '1':
+                self.trigger_buff("Cường hóa trang bị +15")
+            elif choice == '2':
+                self.trigger_buff("Quay Gacha banner giới hạn")
+            elif choice == '3':
+                self.trigger_buff("Khoanh bừa trắc nghiệm / Quay số")
+            elif choice == '4':
+                self.trigger_buff("Hệ thống tối thượng - Chấp mọi thể loại xác suất")
+            elif choice == '0':
+                typing_effect("[-] Đang ngắt kết nối... Chúc bạn luôn gặp may mắn trong đời thực!")
+                break
+            else:
+                print("⚠️ Lựa chọn không hợp lệ, nhưng vì bạn là real kid nên vẫn được tính là may mắn!")
+            
+            input("Nhấn Enter để quay lại Menu chính...")
+            clear_screen()
 
-# --- KHỞI CHẠY ---
+# --- KHỞI CHẠY CHƯƠNG TRÌNH ---
 if __name__ == "__main__":
-    my_flex = UltimateLuckBuffer("RealKid_Master")
-    my_flex.roll_gacha_or_action("Buff tỉ lệ quay hũ / Đập đồ 100%")
+    panel = LuckControlPanel()
+    panel.run()
