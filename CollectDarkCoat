@@ -1,22 +1,20 @@
 -- ==========================================================
--- SCRIPT AUTO FIST OF DARKNESS & BLACKBEARD CAPE + AUTO EXECUTE
+-- SCRIPT AUTO FIST OF DARKNESS & BLACKBEARD CAPE + TWEEN
 -- ==========================================================
 
--- Đảm bảo script tự động chạy lại khi load xong game hoặc hop server
 if getgenv().AutoFarmDarkCoatRunning then
     return
 end
 getgenv().AutoFarmDarkCoatRunning = true
 
--- Bật tính năng chống treo/crash (nếu Executor hỗ trợ)
-if syn and syn.toast_notification then
-    syn.toast_notification("Script Auto Dark Coat đã được kích hoạt!")
-end
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+
+-- Tốc độ bay/tween (điều chỉnh tăng giảm tùy ý, mặc định 300 là khá an toàn)
+local TWEEN_SPEED = 300 
 
 -- Hàm kiểm tra vật phẩm
 local function checkItem(itemName)
@@ -27,6 +25,39 @@ local function checkItem(itemName)
         return true
     end
     return false
+end
+
+-- Hàm Tween (di chuyển mượt đến vị trí chỉ định)
+local function tweenTo(targetCFrame)
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local rootPart = character.HumanoidRootPart
+    local distance = (rootPart.Position - targetCFrame.Position).Magnitude
+    local timeToTravel = distance / TWEEN_SPEED
+    
+    local tweenInfo = TweenInfo.new(timeToTravel, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = targetCFrame})
+    
+    getgenv().CurrentTween = tween
+    tween:Play()
+    
+    local completed = false
+    local connection
+    connection = tween.Completed:Connect(function()
+        completed = true
+        if connection then connection:Disconnect() end
+    end)
+    
+    -- Đợi cho đến khi tween chạy xong hoặc bị ngắt
+    while not completed and character and character.Parent do
+        if checkItem("Dark Coat") or checkItem("Fist of Darkness") then
+            tween:Cancel()
+            if connection then connection:Disconnect() end
+            break
+        end
+        task.wait(0.1)
+    end
 end
 
 -- Hàm Hop Server
@@ -50,24 +81,25 @@ end
 -- Vòng lặp chính
 task.spawn(function()
     while true do
-        -- Kiểm tra nếu đã có Áo choàng râu đen (Dark Coat)
+        -- Kiểm tra nếu đã có Áo choàng râu đen
         if checkItem("Dark Coat") then
             print(">>> ĐÃ SỞ HỮU ÁO CHOÀNG RÂU ĐEN! Dừng script.")
             getgenv().AutoFarmDarkCoatRunning = false
             break
         end
 
-        print(">>> Bắt đầu chu kỳ nhặt rương...")
+        print(">>> Bắt đầu chu kỳ tween nhặt rương...")
         local chestCount = 0
         
-        -- Quét và nhặt tối đa 36 rương
+        -- Quét và tween đến từng rương
         for _, v in pairs(workspace:GetDescendants()) do
-            if checkItem("Dark Coat") then break end
+            if checkItem("Dark Coat") or checkItem("Fist of Darkness") then break end
             
             if v.Name:lower():find("chest") and v:IsA("BasePart") then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
-                    task.wait(0.5)
+                    -- Thực hiện bay mượt tới rương
+                    tweenTo(v.CFrame)
+                    task.wait(0.3) -- Chờ thời gian ngắn để game nhận rương
                     chestCount = chestCount + 1
                     print("Đã nhặt rương thứ: " .. chestCount)
                     
@@ -78,15 +110,14 @@ task.spawn(function()
             end
         end
 
-        -- Kiểm tra Fist of Darkness
+        -- Kiểm tra Fist of Darkness sau khi nhặt rương
         if checkItem("Fist of Darkness") then
-            print(">>> ĐÃ TÌM THẤY FIST OF DARKNESS! Triệu hồi Râu Đen...")
+            print(">>> ĐÃ TÌM THẤY FIST OF DARKNESS! Tween đến bệ thờ Râu Đen...")
             
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                -- Tọa độ bệ thờ Dark Arena tại Sea 2
-                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(3775, 20, -3499)
-                task.wait(2)
-            end
+            -- Tọa độ bệ thờ Dark Arena tại Sea 2
+            local darkArenaPos = CFrame.new(3775, 20, -3499)
+            tweenTo(darkArenaPos)
+            task.wait(1)
             
             -- Chờ tiêu diệt Râu Đen
             repeat
@@ -95,10 +126,9 @@ task.spawn(function()
             until not workspace.Enemies:FindFirstChild("Darkbeard") or checkItem("Dark Coat")
             
         else
-            print(">>> Không thấy Fist of Darkness. Đang tiến hành Hop Server...")
+            print(">>> Đã nhặt xong rương nhưng không có Fist of Darkness. Đang chuyển Server...")
             task.wait(1)
             hopServer()
-            -- Chờ server mới load (nếu chưa kịp teleport thì script sẽ tự loop chờ)
             task.wait(10)
         end
         
